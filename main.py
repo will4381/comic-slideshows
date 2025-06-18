@@ -62,17 +62,21 @@ def create_final_prompt(scenario: ScenarioPair) -> str:
 - Text overlaid directly on artwork in clean, legible, lowercase, sans-serif font
 - NO shapes, boxes, cards, speech bubbles, or thought bubbles around text
 - Text placed directly on the image surface
+- CRITICAL: Text must be positioned at the BOTTOM of each panel, never at the top or middle
+- Text should be large enough to read easily but not overwhelming
 </text_formatting>
 </style_guide>
 
 <content>
 <top_panel>
 <scene>{scenario.success}</scene>
+<text_position>Bottom of the top panel</text_position>
 <text>{scenario.top_text}</text>
 </top_panel>
 
 <bottom_panel>
 <scene>Same character from top panel performing the underlying habit: {scenario.work}. Character could be taking a picture of their progress (reflecting 'proofs' app concept).</scene>
+<text_position>Bottom of the bottom panel</text_position>
 <text>{scenario.bottom_text}</text>
 </bottom_panel>
 </content>
@@ -99,31 +103,55 @@ These will be shown in sequence, so the first one MUST be controversial/attentio
 </task>
 
 <requirements>
-<first_comic>CRITICAL: The first comic MUST be designed to grab attention and ensure users continue to slides 2-4. Make it controversial, provocative, or use a bold statement that challenges common beliefs about success and habits. This slide determines if users will see the rest!</first_comic>
+<first_comic>ABSOLUTELY CRITICAL: The first comic MUST be INSANELY compelling and controversial. This single slide determines if users see slides 2-4. It must:
+- Challenge deeply held beliefs about success
+- Make users feel called out or defensive
+- Use provocative language that stops scrolling
+- Create an emotional reaction (anger, curiosity, or validation)
+- Be impossible to ignore or scroll past
+- Make bold claims that most people disagree with</first_comic>
 
 <scenario_structure>
 Each pair must consist of:
 1. "success" scene: Character enjoying the results of a consistent habit
 2. "work" scene: Same character performing the specific habit that led to that success
-3. "top_text": Text for the top panel (MUST be provocative/controversial for first comic)
+3. "top_text": Text for the top panel (MUST be insanely provocative/controversial for first comic)
 4. "bottom_text": Text for the bottom panel (the habit/work message)
 </scenario_structure>
 
-<messaging_examples>
-- "most people are lazy" / "i'm not most people"
-- "they said i'd fail" / "i proved them wrong"
-- "everyone wants shortcuts" / "i take the long road"
-- "talent is a myth" / "discipline is real"
-- "luck is for losers" / "work is for winners"
-- "excuses are easy" / "results are earned"
-</messaging_examples>
+<high_converting_hooks>
+PROVEN HIGH-CONVERTING FIRST COMIC EXAMPLES:
+- "everyone lies about their success" / "i document the truth"
+- "your excuses are pathetic" / "my habits are powerful"
+- "most people are fake" / "i prove everything"
+- "success isn't for everyone" / "it's for people like me"
+- "you're probably not ready" / "i was born ready"
+- "stop lying to yourself" / "start proving yourself"
+- "your friends hold you back" / "i leave them behind"
+- "comfort kills dreams" / "discomfort builds them"
+- "you talk, i do" / "you wish, i work"
+- "mediocrity is a choice" / "excellence is my habit"
+- "you make excuses" / "i make progress"
+- "lazy people hate this" / "successful people love it"
+- "this isn't for quitters" / "this is for winners"
+- "you scroll, i build" / "you watch, i achieve"
+- "your potential is wasted" / "mine is proven daily"
+
+OTHER SLIDES (less controversial but still engaging):
+- "they said impossible" / "i said watch me"
+- "overnight success took years" / "every single day"
+- "talent is overrated" / "consistency is underrated"
+- "results don't lie" / "neither do my habits"
+</high_converting_hooks>
 
 <constraints>
 - Scenarios must be strictly habit-related and visually distinct
-- First comic should be the most attention-grabbing and controversial
+- First comic should be INSANELY attention-grabbing and controversial
 - All text should be lowercase
 - Focus on habits that can be "proved" with photos
-- Make statements that challenge conventional wisdom
+- Make statements that challenge conventional wisdom and trigger emotional responses
+- The first slide must be impossible to scroll past
+- Use direct, confrontational language that makes people feel called out
 </constraints>
 </requirements>
 
@@ -133,7 +161,7 @@ JSON object conforming to the Pydantic schema, containing exactly 4 scenario pai
                 },
                 {
                     "role": "user",
-                    "content": "Generate 4 habit-based achievement scenario pairs for our app 'proofs', with the first one being controversial/attention-grabbing to ensure users continue to all 4 slides."
+                    "content": "Generate 4 habit-based achievement scenario pairs for our app 'proofs', with the first one being INSANELY controversial and attention-grabbing using the high-converting hook examples provided."
                 }
             ],
             response_format=ComicScenarioPairs,
