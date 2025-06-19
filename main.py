@@ -26,10 +26,18 @@ class ComicScenarioPairs(BaseModel):
         max_length=4
     )
 
-def create_final_prompt(scenario: ScenarioPair) -> str:
+def create_final_prompt(scenario: ScenarioPair, slide_number: int) -> str:
     """
     Creates a detailed, final prompt for image generation by injecting a scenario pair into a style template.
     """
+    engagement_instruction = ""
+    if slide_number == 1:  # First slide - mandatory edgy elements
+        engagement_instruction = """<background_details>MANDATORY: Include provocative, funny, or attention-grabbing background elements that boost engagement. These can be edgy, non-tasteful, or controversial - whatever stops the scroll. NO POLITICAL CONTENT. Examples: provocative posters, funny signs, ironic objects, visual jokes that complement the hook message.</background_details>"""
+    elif slide_number == 3:  # Third slide - subtle provocative elements
+        engagement_instruction = """<background_details>SUBTLE PROVOCATIVE: Add small, hidden provocative elements in the background that viewers might notice on second look. Could include subtle sexual imagery, suggestive objects, or provocative details that don't overwhelm the main scene but add engagement. NO POLITICAL CONTENT. Keep it tasteful but noticeable.</background_details>"""
+    else:  # Other slides - clean focus
+        engagement_instruction = """<background_details>CLEAN FOCUS: Keep background simple and focused on the main message without distracting elements.</background_details>"""
+
     return f"""<instructions>
 <format>
 - Single image, exactly 1024x1536 pixels
@@ -39,44 +47,76 @@ def create_final_prompt(scenario: ScenarioPair) -> str:
 </format>
 
 <style_guide>
-<consistency>CRITICAL: This comic MUST be visually identical in style to all other comics in the series. Use the EXACT same art style, character design, color palette, and rendering approach.</consistency>
+<consistency>ABSOLUTE CRITICAL: This comic MUST be VISUALLY IDENTICAL in style to all other comics in the series. NO VARIATION ALLOWED. Use the EXACT same art style, character design, color palette, and rendering approach across ALL 4 comics.</consistency>
 
-<art_style>Vibrant, modern, high-fidelity cartoon style with 3D-like quality but clearly animated. Premium digital illustration quality.</art_style>
+<mandatory_style>LOCKED CARTOON STYLE: Modern, vibrant, high-quality cartoon illustration style with these EXACT characteristics:
+- Bright, saturated colors with warm lighting
+- Smooth, polished cartoon rendering (like Pixar/Disney style)
+- Characters with exaggerated but appealing cartoon features
+- Clean, rounded character designs with soft edges
+- Vibrant backgrounds with rich color palettes
+- NO realistic or semi-realistic rendering
+- NO muted or desaturated colors
+- NO photorealistic elements
+- Consistent cartoon proportions and facial features across ALL characters
+</mandatory_style>
 
 <characters>
-- Expressive and appealing with well-defined features
-- Realistic but cartoony proportions (similar to modern animated shorts)
-- Character design MUST be IDENTICAL across both panels and across ALL comics in the series
-- Same facial features, body proportions, and clothing style throughout
+- IDENTICAL character design across ALL panels and ALL comics
+- Cartoon-style with exaggerated but appealing features
+- Same facial structure, eye shape, nose, and mouth design
+- Consistent body proportions and clothing style
+- Bright, vibrant character coloring
+- Expressive cartoon faces with clear emotions
 </characters>
 
 <visual_treatment>
-- Clean, subtle linework integrated into rendering for polished look
-- Balanced, sophisticated color palette with rich but slightly desaturated colors
-- Cinematic feel, avoid overly bright or neon colors
-- Sophisticated shading with soft gradients, highlights, and shadows
-- Dynamic lighting for depth and realism within cartoon style
+- Bright, vibrant color palette with warm lighting
+- Smooth cartoon shading with soft gradients
+- Rich, saturated colors throughout
+- Dynamic but cartoon-appropriate lighting
+- NO realistic textures or photographic elements
+- Consistent cartoon rendering quality across all elements
 </visual_treatment>
+
+<content_guidelines>
+- NO POLITICAL CONTENT of any kind
+</content_guidelines>
 
 <text_formatting>
 - Text overlaid directly on artwork in clean, legible, lowercase, sans-serif font
 - NO shapes, boxes, cards, speech bubbles, or thought bubbles around text
 - Text placed directly on the image surface
-- CRITICAL: Text must be positioned at the BOTTOM of each panel, never at the top or middle
-- Text should be large enough to read easily but not overwhelming
+- ABSOLUTE CRITICAL: Text must be positioned at the BOTTOM CENTER of each panel with MANDATORY margins from all edges
+- ABSOLUTE CRITICAL: Text MUST be completely visible within panel boundaries - NO text can be cut off or extend beyond panel edges
+- ABSOLUTE CRITICAL: Leave at least 40-60 pixels margin from the bottom edge of each panel
+- ABSOLUTE CRITICAL: Leave at least 30-40 pixels margin from left and right edges of each panel
+- Text size must be IDENTICAL across all panels and all comics - use a large, bold, consistent font size
+- Text should be approximately 24-28pt equivalent size for readability (smaller if needed to fit)
+- Text must be horizontally centered and have adequate margin from ALL panel edges
+- Text color should be white or light colored for maximum readability
+- If text is too long, reduce font size slightly to ensure it fits completely within margins
 </text_formatting>
+
+<engagement_strategy>
+Slide {slide_number}: {"MANDATORY edgy elements for hook (NO POLITICS)" if slide_number == 1 else "SUBTLE provocative elements (NO POLITICS)" if slide_number == 3 else "CLEAN focus on message"}
+</engagement_strategy>
 </style_guide>
 
 <content>
 <top_panel>
 <scene>{scenario.success}</scene>
-<text_position>Bottom of the top panel</text_position>
+{engagement_instruction}
+<text_position>Bottom center of the top panel, with MANDATORY 40-60px margin from bottom edge and 30-40px margin from left/right edges</text_position>
+<text_size>Large, bold, consistent sizing (24-28pt equivalent) - MUST fit completely within panel margins</text_size>
 <text>{scenario.top_text}</text>
 </top_panel>
 
 <bottom_panel>
 <scene>Same character from top panel performing the underlying habit: {scenario.work}. Character could be taking a picture of their progress (reflecting 'proofs' app concept).</scene>
-<text_position>Bottom of the bottom panel</text_position>
+{engagement_instruction}
+<text_position>Bottom center of the bottom panel, with MANDATORY 40-60px margin from bottom edge and 30-40px margin from left/right edges</text_position>
+<text_size>Large, bold, consistent sizing (24-28pt equivalent) - MUST match top panel exactly and fit completely within panel margins</text_size>
 <text>{scenario.bottom_text}</text>
 </bottom_panel>
 </content>
@@ -220,8 +260,14 @@ def main():
         print("Could not generate scenarios. Exiting.")
         return
 
-    final_prompts = [create_final_prompt(s) for s in scenarios]
+    final_prompts = []
+    for i, scenario in enumerate(scenarios):
+        slide_num = i + 1  # Convert to 1-based numbering
+        prompt = create_final_prompt(scenario, slide_number=slide_num)
+        final_prompts.append(prompt)
+    
     print(f"Generated {len(final_prompts)} prompts for parallel processing...")
+    print("Engagement strategy: Slide 1 (edgy), Slide 2 (clean), Slide 3 (subtle provocative), Slide 4 (clean)")
 
     # Use ThreadPoolExecutor with max_workers=4 to ensure all 4 images process in parallel
     with ThreadPoolExecutor(max_workers=4) as executor:
